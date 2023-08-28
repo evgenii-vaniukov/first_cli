@@ -1,37 +1,105 @@
-import {getDB, insert, saveDB} from "./db.js";
+import yargs from "yargs";
+import {hideBin} from "yargs/helpers";
+import {
+  findNotes,
+  getAllNotes,
+  newNote,
+  removeAllNotes,
+  removeNote,
+} from "./notes.js";
 
-export const newNote = async (note, tags) => {
-  const data = {
-    tags,
-    content: note,
-    id: Date.now(),
-  };
-  await insert(data);
-  return data;
-};
-export const getAllNotes = async () => {
-  const db = await getDB();
-  return db.notes;
-};
-
-export const findNotes = async (filter) => {
-  const notes = await getAllNotes();
-  return notes.filter((note) =>
-    note.content.toLowerCase().includes(filter.toLowerCase())
-  );
+const listNotes = (notes) => {
+  notes.forEach((note) => {
+    console.log("\n");
+    console.log("id: ", note.id);
+    console.log("tags: ", note.tags.join(", ")),
+      console.log("note: ", note.content);
+  });
 };
 
-export const removeNote = async (id) => {
-  const notes = await getAllNotes();
-  const match = notes.find((note) => note.id === id);
-
-  if (match) {
-    const newNotes = notes.filter((note) => note.id !== id);
-    await saveDB({notes: newNotes});
-    return id;
-  }
-};
-
-export const removeAllNotes = async () => {
-  await saveDB({notes: []});
-};
+yargs(hideBin(process.argv))
+  .command(
+    "new <note>",
+    "create a new note",
+    (yargs) => {
+      return yargs.positional("note", {
+        describe: "The content of the note you want to create",
+        type: "string",
+      });
+    },
+    async (argv) => {
+      const tags = argv.tags ? argv.tags.split(",") : [];
+      const note = await newNote(argv.note, tags);
+      console.log("Note added!", note.id);
+    }
+  )
+  .option("tags", {
+    alias: "t",
+    type: "string",
+    description: "tags to add to the note",
+  })
+  .command(
+    "all",
+    "get all notes",
+    () => {},
+    async (argv) => {
+      const notes = await getAllNotes();
+      listNotes(notes);
+    }
+  )
+  .command(
+    "find <filter>",
+    "get matching notes",
+    (yargs) => {
+      return yargs.positional("filter", {
+        describe:
+          "The search term to filter notes by, will be applied to note.content",
+        type: "string",
+      });
+    },
+    async (argv) => {
+      const notes = await findNotes(argv.filter);
+      listNotes(notes);
+    }
+  )
+  .command(
+    "remove <id>",
+    "remove a note by id",
+    (yargs) => {
+      return yargs.positional("id", {
+        type: "number",
+        description: "The id of the note you want to remove",
+      });
+    },
+    async (argv) => {
+      const id = await removeNote(argv.id);
+      if (id) {
+        console.log("Note removed: ", id);
+      } else {
+        console.log("Note not found");
+      }
+    }
+  )
+  .command(
+    "web [port]",
+    "launch website to see notes",
+    (yargs) => {
+      return yargs.positional("port", {
+        describe: "port to bind on",
+        default: 5000,
+        type: "number",
+      });
+    },
+    async (argv) => {}
+  )
+  .command(
+    "clean",
+    "remove all notes",
+    () => {},
+    async (argv) => {
+      await removeAllNotes();
+      console.log("All notes removed");
+    }
+  )
+  .demandCommand(1)
+  .parse();
