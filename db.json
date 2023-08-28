@@ -1,3 +1,12 @@
 {
-    "notes": [] 
+  "notes": [
+    {
+      "tags": [
+        "test",
+        " nice"
+      ],
+      "content": "Hi",
+      "id": 1693263950674
+    }
+  ]
 }
