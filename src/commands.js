@@ -7,15 +7,7 @@ import {
   removeAllNotes,
   removeNote,
 } from "./notes.js";
-
-const listNotes = (notes) => {
-  notes.forEach((note) => {
-    console.log("\n");
-    console.log("id: ", note.id);
-    console.log("tags: ", note.tags.join(", ")),
-      console.log("note: ", note.content);
-  });
-};
+import {listNotes} from "./utils.js";
 
 yargs(hideBin(process.argv))
   .command(
