@@ -2,11 +2,16 @@
   "notes": [
     {
       "tags": [
-        "test",
-        " nice"
+        "test 2",
+        " csgo"
       ],
-      "content": "Hi",
-      "id": 1693263950674
+      "content": "csgo",
+      "id": 1693320117755
+    },
+    {
+      "tags": [],
+      "content": "csgo cool",
+      "id": 1693320190659
     }
   ]
 }
