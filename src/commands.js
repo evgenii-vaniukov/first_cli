@@ -7,6 +7,7 @@ import {
   removeAllNotes,
   removeNote,
 } from "./notes.js";
+import {start} from "./server.js";
 import {listNotes} from "./utils.js";
 
 yargs(hideBin(process.argv))
@@ -73,24 +74,28 @@ yargs(hideBin(process.argv))
     }
   )
   .command(
-    "web [port]",
-    "launch website to see notes",
-    (yargs) => {
-      return yargs.positional("port", {
-        describe: "port to bind on",
-        default: 5000,
-        type: "number",
-      });
-    },
-    async (argv) => {}
-  )
-  .command(
     "clean",
     "remove all notes",
     () => {},
     async (argv) => {
       await removeAllNotes();
       console.log("All notes removed");
+    }
+  )
+  .command(
+    "web [port]",
+    "launch website to see notes",
+    (yargs) => {
+      return yargs.positional("port", {
+        describe: "port to bind on",
+        default: 4000,
+        type: "number",
+      });
+    },
+    async (argv) => {
+      const notes = await getAllNotes();
+      start(notes, argv.port);
+      console.log(`Server is listening on port ${argv.port}`);
     }
   )
   .demandCommand(1)
